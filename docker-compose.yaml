@@ -1,0 +1,44 @@
+version: '3.3'
+
+services:
+   wordpress:
+     depends_on:
+       - db
+       - redis
+#     image: wordpress:latest
+     build: .
+     ports:
+       - "9999:80"
+     restart: always
+     environment:
+       WORDPRESS_DB_HOST: db:3306
+       WORDPRESS_DB_USER: admin1
+       WORDPRESS_DB_PASSWORD: admin
+       WORDPRESS_DB_NAME: wordpress
+       WP_REDIS_HOST: redis
+       WP_CACHE_KEY_SALT: wp-docker-key
+       
+   redis:
+    image: redis
+#    ports:
+#       - "6379:6379"
+
+   db:
+     image: mysql:5.7
+#     volumes:
+#       - db_data:/var/lib/mysql
+     restart: always
+     environment:
+       MYSQL_ROOT_PASSWORD: adminpassword
+       MYSQL_DATABASE: wordpress
+       MYSQL_USER: admin1
+       MYSQL_PASSWORD: admin
+
+   adminer:
+     image: adminer
+     restart: always
+     ports:
+       - 8080:8080
+     links:
+      - db
+
