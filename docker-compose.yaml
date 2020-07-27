@@ -6,7 +6,7 @@ services:
        - db
        - redis
 #     image: wordpress:latest
-     build: .
+     build: ./wordpress
      ports:
        - "9999:80"
      restart: always
@@ -19,7 +19,8 @@ services:
        WP_CACHE_KEY_SALT: wp-docker-key
        
    redis:
-    image: redis
+#    image: redis
+     build: ./redis
 #    ports:
 #       - "6379:6379"
 
