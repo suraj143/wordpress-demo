@@ -19,6 +19,7 @@ $ cd wordpress-demo
 $ docker-compose up --build -d
 $ docker-compose ps
 ```
+* Take a coffe break 
 * open your browser to http://localhost:9999
 
 ### Launch Weave-Scope UI:
