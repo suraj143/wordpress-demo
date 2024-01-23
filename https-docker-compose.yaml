@@ -1,0 +1,77 @@
+version: "3"
+services:
+  nginx:
+    container_name: nginx
+    image: nginxproxy/nginx-proxy
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./nginx/html:/usr/share/nginx/html
+      - ./nginx/certs:/etc/nginx/certs
+      - ./nginx/vhost:/etc/nginx/vhost.d
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+#  letsencrypt-companion:
+#    container_name: letsencrypt-companion
+#    image: jrcs/letsencrypt-nginx-proxy-companion
+#    restart: unless-stopped
+#    volumes_from:
+#      - nginx
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock
+#      - ./nginx/acme:/etc/acme.sh
+#    environment:
+#      DEFAULT_EMAIL: surajbadsha18@gmail.com
+  redis:
+    container_name: redis
+#alpine
+    image: redis
+    volumes:
+     - /var/run/docker.sock:/tmp/docker.sock:ro
+     - ./redis/cache_data:/data
+    restart: unless-stopped
+  website:
+    image: wordpress
+    container_name: website
+#    scale: "3"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./website:/var/www/html
+    environment:
+      WORDPRESS_DB_HOST: website-db:3306
+      WORDPRESS_DB_USER: website
+      WORDPRESS_DB_PASSWORD: admin
+      WORDPRESS_DB_NAME: website
+      WP_REDIS_HOST: redis
+      WP_CACHE_KEY_SALT: wp-docker-key
+      VIRTUAL_HOST: triveree.com,www.triveree.com
+      LETSENCRYPT_HOST: triveree.com,www.triveree.com
+    depends_on:
+      - website-db
+    restart: unless-stopped
+  website-db:
+    image: mariadb
+    container_name: website-db
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./website-db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: website
+      MYSQL_USER: website
+      MYSQL_PASSWORD: admin
+    restart: unless-stopped
+  adminer:
+    image: adminer
+#    build:
+#      context: ./adminer
+    restart: always
+    ports:
+      - 8080:8080
+    links:
+     - website-db
